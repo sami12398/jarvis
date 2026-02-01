@@ -785,16 +785,25 @@ class JarvisCore:
 
     def _shutdown_system(self, cmd: str) -> Dict:
         """Shutdown or restart"""
-        if 'restart' in cmd or 'reboot' in cmd:
-            os.system("shutdown /r /t 10 /c 'JARVIS restarting system as requested'")
-            return {"success": True, "action": "power", "message": "Restarting in 10 seconds...", "data": None}
-        elif 'shutdown' in cmd or 'turn off' in cmd:
-            os.system("shutdown /s /t 10 /c 'JARVIS shutting down system as requested'")
-            return {"success": True, "action": "power", "message": "Shutting down in 10 seconds... Say 'abort shutdown' to cancel", "data": None}
-        elif 'abort' in cmd or 'cancel' in cmd:
-            os.system("shutdown /a")
-            return {"success": True, "action": "power", "message": "Shutdown aborted", "data": None}
-        return {"success": False, "action": "power", "message": "Specify shutdown, restart, or abort", "data": None}
+        try:
+            if 'abort' in cmd or 'cancel' in cmd:
+                result = subprocess.run(['shutdown', '/a'], capture_output=True, text=True)
+                return {"success": True, "action": "power", "message": "Shutdown aborted", "data": None}
+            elif 'restart' in cmd or 'reboot' in cmd:
+                result = subprocess.run(['shutdown', '/r', '/t', '10', '/c', 'JARVIS restarting system'], capture_output=True, text=True)
+                if result.returncode == 0:
+                    return {"success": True, "action": "power", "message": "Restarting in 10 seconds... Say 'abort shutdown' to cancel", "data": None}
+                else:
+                    return {"success": False, "action": "power", "message": f"Restart failed: {result.stderr}", "data": None}
+            elif 'shutdown' in cmd or 'turn off' in cmd:
+                result = subprocess.run(['shutdown', '/s', '/t', '10', '/c', 'JARVIS shutting down system'], capture_output=True, text=True)
+                if result.returncode == 0:
+                    return {"success": True, "action": "power", "message": "Shutting down in 10 seconds... Say 'abort shutdown' to cancel", "data": None}
+                else:
+                    return {"success": False, "action": "power", "message": f"Shutdown failed: {result.stderr}", "data": None}
+            return {"success": False, "action": "power", "message": "Specify shutdown, restart, or abort", "data": None}
+        except Exception as e:
+            return {"success": False, "action": "power", "message": f"Power command failed: {str(e)}", "data": None}
 
     def _list_processes(self) -> Dict:
         """List running processes"""
