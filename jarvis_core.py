@@ -796,13 +796,13 @@ class JarvisCore:
                 if result.returncode == 0:
                     return {"success": True, "action": "power", "message": "Restarting in 10 seconds... Say 'abort shutdown' to cancel", "data": None}
                 else:
-                    return {"success": False, "action": "power", "message": f"Restart failed: {result.stderr}", "data": {"error": result.stderr}}
+                    return {"success": False, "action": "power", "message": f"Restart failed: {result.stderr}", "data": None}
             elif 'shutdown' in cmd or 'turn off' in cmd:
                 result = subprocess.run(['shutdown', '/s', '/f', '/t', '10', '/c', 'JARVIS shutting down system'], capture_output=True, text=True)
                 if result.returncode == 0:
                     return {"success": True, "action": "power", "message": "Shutting down in 10 seconds... Say 'abort shutdown' to cancel", "data": None}
                 else:
-                    return {"success": False, "action": "power", "message": f"Shutdown failed: {result.stderr}", "data": {"error": result.stderr}}
+                    return {"success": False, "action": "power", "message": f"Shutdown failed: {result.stderr}", "data": None}
             return {"success": False, "action": "power", "message": "Specify shutdown, restart, or abort", "data": None}
         except Exception as e:
             return {"success": False, "action": "power", "message": f"Power command failed: {str(e)}", "data": None}

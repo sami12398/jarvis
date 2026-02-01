@@ -683,8 +683,8 @@
         animateBg();
 
         // --- 2. JARVIS Core Functionality ---
-        const API_URL = 'http://localhost:5000/api/command';
-        const STATUS_URL = 'http://localhost:5000/api/status';
+        const API_URL = '/api/command';
+        const STATUS_URL = '/api/status';
 
         let recognition;
         let isListening = false;
@@ -828,15 +828,14 @@
                     speak(data.message);
                     updateStatus('ONLINE', 'Ready');
                 } else {
-                    throw new Error(data.message || 'Failed');
+                    log(data.message || 'Command failed', 'error');
+                    speak('Command failed');
+                    updateStatus('ONLINE', 'Error');
                 }
             } catch (e) {
-                // Fallback simulation if backend is offline
-                setTimeout(() => {
-                    log(`Command sent: ${cmd}`, 'success');
-                    speak(`Executing ${cmd}`);
-                    updateStatus('ONLINE', 'Ready');
-                }, 1000);
+                log('Connection error: Server may be offline', 'error');
+                updateStatus('OFFLINE', 'No Connection');
+                console.error('API Error:', e);
             }
         }
 
