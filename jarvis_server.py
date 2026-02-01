@@ -8,7 +8,6 @@ from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 from jarvis_core import jarvis
 import os
-import threading
 import time
 
 app = Flask(__name__, static_folder='.')
@@ -21,6 +20,9 @@ def index():
 @app.route('/api/command', methods=['POST'])
 def command():
     data = request.json
+    if not data or 'command' not in data:
+        return jsonify({"success": False, "message": "No command provided"}), 400
+        
     cmd = data.get('command', '')
     
     print(f"\n[Command] {cmd}")
