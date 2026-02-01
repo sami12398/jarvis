@@ -45,8 +45,14 @@ class JarvisCore:
                 query = cmd.replace('search', '').replace('google', '').replace('for', '').strip()
                 result = self._handle_google_search(query)
             
+            # Power commands (MUST be before open/start check since 'restart' contains 'start')
+            elif any(x in cmd for x in ['shutdown', 'restart', 'reboot', 'turn off']) and 'abort' not in cmd:
+                result = self._shutdown_system(cmd)
+            elif 'abort' in cmd or 'cancel shutdown' in cmd:
+                result = self._shutdown_system(cmd)
+            
             # System & Window Management
-            elif any(x in cmd for x in ['open', 'start', 'launch']):
+            elif any(x in cmd for x in ['open', 'start', 'launch']) and 'restart' not in cmd:
                 result = self._handle_open(cmd)
             elif cmd.startswith('close') or cmd.startswith('kill') or cmd.startswith('exit'):
                 result = self._handle_close(cmd)
@@ -84,10 +90,6 @@ class JarvisCore:
                 result = self._tell_joke()
             elif 'weather' in cmd:
                 result = self._get_weather(cmd)
-            elif any(x in cmd for x in ['shutdown', 'restart', 'reboot']) and 'abort' not in cmd:
-                result = self._shutdown_system(cmd)
-            elif 'abort' in cmd or 'cancel shutdown' in cmd:
-                result = self._shutdown_system(cmd)
             elif 'list processes' in cmd or 'running apps' in cmd:
                 result = self._list_processes()
             elif cmd.startswith('terminate') or (cmd.startswith('kill') and 'kill' in cmd and 'close' not in cmd):
